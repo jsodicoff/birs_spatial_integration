@@ -12,6 +12,10 @@ library(magrittr)
 library(ggplot2)
 ggplot2::theme_set(theme_cowplot())
 load("birs_data.RData")
+metadata = read.csv("GSE115746_complete_metadata_28706-cells.csv")
+samples = intersect(colnames(tasic), as.character(metadata[as.character(metadata$source_name) == "Primary Visual Cortex (VISp)",]$sample_name))
+tasic = tasic[,samples]
+tasic_clust =tasic_clust[samples]
 ```
 
 To increase the resolution of the scRNAseq, we utilized the dataset from [Tasic et al](https://www.nature.com/articles/s41586-018-0654-5), with over 43,000 genes and 23,000 cells.
@@ -33,7 +37,7 @@ by_liger_cluster = plotByDatasetAndCluster(liger_seqfish, return.plots = T)[[2]]
 by_tasic_cluster = plotByDatasetAndCluster(liger_seqfish, clusters = tasic_clust, return.plots = T)[[2]]
 by_seqfish_cluster = plotByDatasetAndCluster(liger_seqfish, clusters = seq_clust, return.plots = T)[[2]]
 ```
-```{r display_seqfish}
+```{r display_seqfish, warning = F}
 seqfish_stats
 by_dataset
 by_liger_cluster
@@ -124,7 +128,7 @@ for(n in 1:10){
       starmap_ari = calcARI(liger_down, starmap_clust)
       tasic_ari = calcARI(liger_down, tasic_clust)
       alignment = calcAlignment(liger_down)
-      stats_starmap = rbind(stats, c(i, starmap_purity, tasic_purity, starmap_ari,  tasic_ari,alignment))
+      stats_starmap = rbind(stats_starmap, c(i, starmap_purity, tasic_purity, starmap_ari,  tasic_ari,alignment))
   }
   liger_seqfish = createLiger(list(tasic = tasic, seqfish = seqfish))
   liger_seqfish %<>% normalize() %>% selectGenes() %>% scaleNotCenter()
@@ -143,4 +147,4 @@ stats_seqfish = stats_seqfish[2:nrow(stats_seqfish),]
 stats_starmap = stats[order(stats_starmap[,1]),]
 ```
 
-![Downsampling summary](summary.PNG)
+![Downsampling summary](updated_summary.PNG)
